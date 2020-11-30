@@ -23,13 +23,7 @@
 
   - name: maven package war
     command: mvn -f /home/skawap/home_work8/pom.xml clean package
-    become: yes
-  
-  - name: Copy to local war-file
-    fetch:
-      src: /home/skawap/home_work8/target/hello-1.0.war
-      dest: /home/skawap/home_work8/
-      flat: yes 
+    become: yes 
     
 - name: deploy and start Boxfuse
   hosts: prod
@@ -51,7 +45,6 @@
       state: started 
       enabled: yes
   
-  - name : Deploy Boxfuse (copy war file on Tomcat)
-    copy:
-      src: hello-1.0.war
-      dest: /var/lib/tomcat9/webapps
+  - name: Copy Remote-To-Remote (from serverA to serverB)
+    synchronize: src=/home/skawap/home_work8/target/ dest=/var/lib/tomcat9/webapps/
+    delegate_to: "{{ groups['dev'][0] }}"
