@@ -24,9 +24,6 @@
   - name: maven package war
     command: mvn -f /home/skawap/home_work8/pom.xml clean package
     become: yes
-
-  - name: Copy war to prod
-    shell: scp /home/skawap/home_work8/target/*.war root@13.68.155.118:/tmp/test2
   
   - name: Copy to local war-file
     fetch:
