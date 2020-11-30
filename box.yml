@@ -1,0 +1,58 @@
+---
+- name: app Boxfuse provisioning
+  hosts: dev
+  become: yes
+  
+  tasks:
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+
+  - name: install default-jdk and Maven
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - default-jdk
+      - maven
+  
+  - name: GIT Clone Boxfuse
+    git:
+      repo: 'https://github.com/boxfuse/boxfuse-sample-java-war-hello.git'
+      dest: /home/skawap/home_work8
+
+  - name: maven package war
+    command: mvn -f /home/skawap/home_work8/pom.xml clean package
+    become: yes
+
+  - name: Copy war to prod
+    shell: scp /home/skawap/home_work8/target/*.war root@13.68.155.118:/tmp
+
+- name: deploy and start Boxfuse
+  hosts: prod
+  become: yes
+ 
+  tasks:
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+
+  - name: Install Tomcat 9
+    apt:
+      name: tomcat9 
+      state: present
+
+  - name: Ensure Tomcat9 is started and enabled on boot.
+    service:
+      name: tomcat9
+      state: started 
+      enabled: yes     
+  
+  - name: Deploy war Boxfuse
+    copy:
+      src: /tmp/hello-1.0.war
+      dest: /var/lib/tomcat9/webapps
+      owner: root
+      group: root
+      mode: u+rw,g-wx,o-rwx
+      become: yes
